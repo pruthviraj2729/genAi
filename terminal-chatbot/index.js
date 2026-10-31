@@ -1,3 +1,4 @@
+// chat through invoke
 // import dotenv from 'dotenv'
 // import { ChatGroq } from '@langchain/groq'
 
@@ -8,78 +9,76 @@
 //   apiKey: process.env.GROQ_API_KEY
 // })
 
-// const response = await llm.invoke("hi how are u?")
+// const res = await llm.invoke("how are u my buddy?");
+
+// console.log(res.content)
 
 
-// console.log(response.content)
 
+
+// chat without stream
 // import dotenv from 'dotenv'
 // import { ChatGroq } from '@langchain/groq'
 // import rl from 'readline/promises'
+// import { stdin } from 'process';
 
-// dotenv.config()
+// dotenv.config();
 
 // const llm = new ChatGroq({
 //   model: 'openai/gpt-oss-120b',
-//   apiKey: process.env.GROQ_API_KEY
+//   apiKey: process.env.ChatGroq
 // })
 
-// const response = await llm.invoke("hi how are u?")
-
 // const readline = rl.createInterface({
-//     input: process.stdin,
-//     output: process.stdout
+//   input: process.stdin,
+//   output: process.stdout
 // })
 
 // while(true) {
-//     const userInpt = await readline.question("Enter your input:");
+//   const userInp = await readline.question("Enter your input:");
 
-//     const res = await llm.invoke(userInpt)
+//   const res = await llm.invoke(userInp)
 
-//     process.stdout.write(res.content)
+//   process.stdout.write(res.content)
 
-//     process.stdout.write("\n")
+//   process.stdout.write('\n')
 
+  
 // }
 
 
-
+// chat using stream effect
 import dotenv from 'dotenv'
 import { ChatGroq } from '@langchain/groq'
 import rl from 'readline/promises'
 
-dotenv.config()
+dotenv.config();
 
 const llm = new ChatGroq({
   model: 'openai/gpt-oss-120b',
   apiKey: process.env.GROQ_API_KEY
 })
 
-const response = await llm.invoke("hi how are u?")
-
 const readline = rl.createInterface({
-    input: process.stdin,
-    output: process.stdout
+  input: process.stdin,
+  output: process.stdout
 })
 
-while(true) {
-    const userInpt = await readline.question("Enter your input:");
+while(true){
+  const userInp = await readline.question("Enter your input:");
 
-    const stream = await llm.stream([
-        
-           {
-             role: "user",
-             content: userInpt
-           }
-        
-    ])
-
-    for await (const chunk of stream){
-        process.stdout.write(chunk.content)
+  const stream = await llm.stream([
+    {
+      role: "user",
+      content: userInp
     }
+  ])
 
-    process.stdout.write("\n")
+  for await (const chunk of stream){
+    process.stdout.write(chunk.content)
+  }
+
+  process.stdout.write("\n")
+
 
 }
-
-// console.log(response.content)
