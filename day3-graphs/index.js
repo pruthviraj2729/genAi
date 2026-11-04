@@ -3,6 +3,7 @@ import dotenv from "dotenv"
 import { tool, createAgent} from 'langchain'
 import * as z from "zod"
 import rl from 'readline/promises'
+import { StateGraph, START,END } from '@langchain/langgraph'
 
 dotenv.config();
 
@@ -52,31 +53,66 @@ const agent = createAgent({
     tools:[createEventTool, getEventsTool]
 })
 
-const messages = [];
+async function LLMNODE(state) {
+    console.log("LLMNODE state", state)
 
-while(true){
-    const userInp = await readline.question("enter your input:")
-
-    messages.push({
-        role:"user",
-        content: userInp
-    })
-
-    const stram = await agent.stream({
-       messages
-    }, {streamMode: "messages"})
-
-    let aiMessage = ""
-
-    for await (const [chunks] of stram){
-        aiMessage += chunks.content
-        process.stdout.write(chunks.content)
+    return {
+        messages: [
+            ...state.messages,
+            {
+                role: "assistant",
+                content: "Hello user"
+            }
+        ]
     }
-
-    messages.push({
-        role: "assistant",
-        content: aiMessage
-    })
-
-    process.stdout.write("\n")
 }
+
+const graph = new StateGraph(
+    z.object({
+        messages: z.array(z.any())
+    })
+)
+.addNode("LLMNODE", LLMNODE)
+.addEdge(START, "LLMNODE")
+.addEdge("LLMNODE", END)
+.compile()
+
+const graphResult = await graph.invoke({
+    messages: [
+        {
+            role: "user",
+            content: "hello world"
+        }
+    ]
+})
+
+console.log("geaph result:", graphResult)
+
+// const messages = [];
+
+// while(true){
+//     const userInp = await readline.question("enter your input:")
+
+//     messages.push({
+//         role:"user",
+//         content: userInp
+//     })
+
+//     const stram = await agent.stream({
+//        messages
+//     }, {streamMode: "messages"})
+
+//     let aiMessage = ""
+
+//     for await (const [chunks] of stram){
+//         aiMessage += chunks.content
+//         process.stdout.write(chunks.content)
+//     }
+
+//     messages.push({
+//         role: "assistant",
+//         content: aiMessage
+//     })
+
+//     process.stdout.write("\n")
+// }
