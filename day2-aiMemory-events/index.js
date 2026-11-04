@@ -1,12 +1,10 @@
 import dotenv from 'dotenv'
 import { ChatGroq } from '@langchain/groq'
 import rl from 'readline/promises'
-import { tool, createAgent} from 'langchain'
+import { tool, createAgent } from 'langchain'
 import * as z from 'zod'
 
 dotenv.config()
-
-const messages = []
 
 const llm = new ChatGroq({
     model: "openai/gpt-oss-120b",
@@ -18,75 +16,76 @@ const readline = rl.createInterface({
     output: process.stdout
 })
 
+const messages = []
 const events = []
 
 const createTask = tool(
-    async function({date, title, description}) {
-        console.log("creating event:", {date, title, description})
+    async function({title, date, description}) {
+        console.log("event created", {title, date, description})
 
-        events.push({
-            date, title,description
-        })
+        events.push({title,date, description })
         return "event created"
     },
     {
-        name: "createEvent",
-        description: "Create a new event with a date, title, and description",
+        name: "creatingEvent",
+        description: "create a new event with name, date and description",
         schema: z.object({
+            name: z.string(),
             date: z.string(),
-            title: z.string(),
             description: z.string()
         })
     }
-)
+) 
 
-const getEventTool = tool(
+const getEvents = tool(
         async function ({ }) {
-        console.log("Retrieving events:", events)
+        console.log("retreving events" ,events)
         return events
     },
     {
         name: "getEvents",
-        description: "Retrieves all events",
+        description: "retrived all events",
         schema: z.object({})
-        
+    }
+)
+
+const agent = createAgent({
+    model: llm,
+    tools: [createTask, getEvents]
+})
+
+while(true) {
+    const userInp = await readline.question("Enter your input:")
+    messages.push({
+        role: "user",
+        content:  userInp
     })
-    // return "event created"
 
-    const agent = createAgent({
-        model: llm,
-        tools:[createTask, getEventTool]
-    })
-
-
-
-while(true){
-    const userInp = await readline.question("enter your input:")
-    messages.push(userInp)
-
+    // const res = await llm.stream(messages)
     const stream = await agent.stream({
         messages: [
             {
-                role: 'user',
+                role: "user",
                 content: userInp
             }
-        ]    
-    }, { streamMode: "messages" })
+        ]
+    }, {streamMode: "messages"})
 
-    // let aiMessage = '';
+    // let aiMessages = "";
 
     for await (const [chunk] of stream){
-        // aiMessage += chunk.content;
+        // aiMessages += chunk.content;
+
         process.stdout.write(chunk.content)
     }
 
     // messages.push({
     //     role: "assistant",
-    //     content: aiMessage
+    //     content: aiMessages
     // })
 
     process.stdout.write("\n")
+
+
 }
-
-
 
