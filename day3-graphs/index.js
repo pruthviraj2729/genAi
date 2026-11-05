@@ -53,10 +53,10 @@ const agent = createAgent({
     tools:[createEventTool, getEventsTool]
 })
 
-async function LLMNODE(state) {
+async function LLMNode(state) {
     console.log("LLMNODE state", state)
 
-    return {
+    return{
         messages: [
             ...state.messages,
             {
@@ -72,21 +72,34 @@ const graph = new StateGraph(
         messages: z.array(z.any())
     })
 )
-.addNode("LLMNODE", LLMNODE)
-.addEdge(START, "LLMNODE")
-.addEdge("LLMNODE", END)
+.addNode("LLMNode", LLMNode)
+.addEdge(START, "LLMNode")
+.addEdge("LLMNode", END)
 .compile()
 
 const graphResult = await graph.invoke({
     messages: [
         {
             role: "user",
-            content: "hello world"
+            content: "Hi AI"
         }
     ]
 })
 
+
+
+// const graphResult = await graph.invoke({
+//     messages: [
+//         {
+//             role: "user",
+//             content: "hello world"
+//         }
+//     ]
+// })
+
 console.log("geaph result:", graphResult)
+
+
 
 // const messages = [];
 
