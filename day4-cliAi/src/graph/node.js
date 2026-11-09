@@ -1,8 +1,9 @@
 import { ChatGroq } from '@langchain/groq'
-import { getApiKey } from '../utils/file.utils'
+import { getApiKey } from '../utils/file.utils.js'
 import {AIMessage} from 'langchain'
 
-export async function LLMNODE(state) {
+export async function LLMNODE(state, context) {
+    console.log(context)
 
     const model = new ChatGroq({
         model: "openai/gpt-oss-120b",
@@ -16,7 +17,7 @@ export async function LLMNODE(state) {
     let aiMesages = ""
 
     for await(const chunk of stream){
-        process.stdout.write(chunk)
+        process.stdout.write(chunk.text)
         aiMesages += chunk.text
     }
 
