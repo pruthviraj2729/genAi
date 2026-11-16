@@ -19,7 +19,7 @@ export async function LLMNODE(state, context) {
 
     process.stdout.write("[AI]: ")
 
-    let aiMessages;
+    let aiMessages = null;
 
     for await(const chunk of stream){
         process.stdout.write(chunk.text)
@@ -27,14 +27,14 @@ export async function LLMNODE(state, context) {
         aiMessages = aiMessages ? aiMessages.concat(chunk) : chunk;
         // aiMessages += chunk.text
     }
-    console.log(aiMessages)
+    // console.log(aiMessages)
 
     process.stdout.write("\n")
 
     return{
         messages: [
             ...state.messages,
-             new AIMessage(aiMessages)
+             aiMessages
         ]
     }
 
@@ -46,12 +46,16 @@ export async function ToolNode(state, config){
     const lastMessages = state.messages[state.messages.length-1]
     const toolCalls = lastMessages.tool_calls
 
-    const toolResult = []
+    // const toolResult = []
 
-    for(const toolCall of toolCalls){
-        const result = await fileTools[toolCall.name].invoke(toolCall) 
-        toolResult.push(result)
-    }
+    // for(const toolCall of toolCalls){
+    //     const result = await fileTools[toolCall.name].invoke(toolCall) 
+    //     toolResult.push(result)
+    // }
+
+    const toolResult = await Promise.all(toolCalls.map(async toolCall => {
+        return await fileTools[ toolCall.name ].invoke(toolCall)
+    }))
 
     return {
         messages:[
