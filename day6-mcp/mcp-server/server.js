@@ -31,6 +31,6 @@ server.registerTool(
     }
 )
 
-const transPort = await StdioServerTransport();
+const transPort = new StdioServerTransport();
 
 await server.connect(transPort);
