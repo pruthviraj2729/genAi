@@ -16,29 +16,29 @@ const adapter = new MCPAdapter({
     }
 })
 
-try {
-    const tools = await adapter.listTools();
-    console.log(tools.map((t) => t.name))
+const tools = await adapter.listTools();
+console.log("Available tools:", tools)
 
-    const agent = createAgent({
-        model: new ChatMistralAI({model: "mistral-large-latest"}),
-        tools,
+// try {
+//     const tools = await adapter.listTools();
+//     console.log(tools.map((t) => t.name))
 
-    });
+//     const agent = createAgent({
+//         model: new ChatMistralAI({model: "mistral-large-latest"}),
+//         tools,
 
-    const result = await agent.invoke({
-        message: [
-            {
-                role: "user",
-                content: "Am I free on 2026-10-17 at 4pm IST? If yes, book 'Doubt session' for 30 minutes.",
-            }
-        ]
-    })
-    console.log(result.content)
-} finally {
-    await adapter.close();
-}
+//     });
 
-// const tools = await adapter.listTools();
+//     const result = await agent.invoke({
+//         message: [
+//             {
+//                 role: "user",
+//                 content: "Am I free on 2026-10-17 at 4pm IST? If yes, book 'Doubt session' for 30 minutes.",
+//             }
+//         ]
+//     })
+//     console.log(result.content)
+// } finally {
+//     await adapter.close();
+// }
 
-// console.log("Available tools:", tools)
